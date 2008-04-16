@@ -6,6 +6,8 @@ require File.dirname(__FILE__) + "/../lib/xml_node"
 
 class TestXmlNode < Test::Unit::TestCase
   
+  FEED_WITH_3_ELEMENTS = '<feed><elem>1</elem><elem>2</elem><elem>3</elem></feed>'
+  
   def test_parse_sanity    
     assert_raise(ArgumentError) { XmlNode.parse }
     assert_nothing_raised { XmlNode.parse('<feed/>') }
@@ -31,13 +33,29 @@ class TestXmlNode < Test::Unit::TestCase
   end
 
   def test_find_first
-    xml = XmlNode.parse('<feed><elem>1</elem><elem>2</elem><elem>3</elem></feed>')
+    xml = XmlNode.parse(FEED_WITH_3_ELEMENTS)
     assert_equal '1', xml.find(:first, '//elem').text
   end
 
   def test_find_all
-    xml = XmlNode.parse('<feed><elem>1</elem><elem>2</elem><elem>3</elem></feed>')
+    xml = XmlNode.parse(FEED_WITH_3_ELEMENTS)
     assert_equal ['1', '2', '3'], xml.find(:all, '//elem').collect(&:text)
   end
 
+	def test_get_children_count
+		feed = XmlNode.parse(FEED_WITH_3_ELEMENTS)
+		assert_equal feed.children.size, 3
+		assert_equal feed.children.count, 3
+	end
+
+	def test_mixed_text_content
+		mixed = '<comment><text>Ok this is <b>really</b> great</text></comment>'	
+		xml = XmlNode.parse(mixed)
+		text = xml.find(:first, 'text').text
+		# should not only return the text before the first child-element
+		assert_not_equal "Ok this is ", text
+		# should have 2 text nodes and one element
+		assert 3, text.children.count
+	end
+	
 end

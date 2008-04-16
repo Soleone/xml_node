@@ -72,6 +72,13 @@ class XmlNode
       @parent.element.each_element { |e| yield node_for(e) }
     end
     
+    # Added for convenience
+    def size
+    	each{}.map.size
+    end
+    alias_method :count, :size
+    
+    private
     private
     
     def node_for(element)
